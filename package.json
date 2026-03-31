@@ -1,5 +1,5 @@
 {
-  "name": "bujeti-global-search",
+  "name": "global-search",
   "version": "0.1.0",
   "description": "A polished global search and command palette component for React dashboards.",
   "license": "UNLICENSED",

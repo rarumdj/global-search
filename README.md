@@ -1,6 +1,6 @@
-# Bujeti Global Search
+# Global Search
 
-`bujeti-global-search` is a React command palette and global search component with:
+`global-search` is a React command palette and global search component with:
 
 - scoped search across menu items, records, and actions
 - keyboard shortcuts and recent searches
@@ -36,8 +36,8 @@ React and React DOM are exposed as peer dependencies. The library entry imports 
 ## Usage
 
 ```tsx
-import { GlobalSearch } from 'bujeti-global-search';
-import 'bujeti-global-search/styles.css';
+import { GlobalSearch } from 'global-search';
+import 'global-search/styles.css';
 ```
 
 ```tsx
@@ -60,4 +60,3 @@ If you want remote, permission-aware search later, pass `apiKey` and `onSearch` 
 - The repo is library-first now. Old dashboard/auth/routes/services code has been removed.
 - The demo app exists only to exercise the package locally.
 - Keep new work inside `src/lib/global-search` unless it is truly demo-only.
-# global-search

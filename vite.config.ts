@@ -22,7 +22,7 @@ export default defineConfig(({ command, mode }) => {
           copyPublicDir: false,
           lib: {
             entry: path.resolve(__dirname, 'src/index.ts'),
-            name: 'BujetiGlobalSearch',
+            name: 'GlobalSearch',
             formats: ['es', 'cjs'],
             fileName: (format) => (format === 'es' ? 'index.js' : 'index.cjs'),
             cssFileName: 'styles',
