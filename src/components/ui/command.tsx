@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { InputGroup, InputGroupAddon } from '@/components/ui/input-group';
-import { Check, SearchLg } from '@untitledui/icons';
+import { Check, Search } from 'lucide-react';
 
 function Command({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) {
   return (
@@ -71,7 +71,7 @@ function CommandInput({
           {...props}
         />
         <InputGroupAddon>
-          <SearchLg className="size-4 shrink-0 opacity-50" />
+          <Search className="size-4 shrink-0 opacity-50" />
         </InputGroupAddon>
       </InputGroup>
     </div>

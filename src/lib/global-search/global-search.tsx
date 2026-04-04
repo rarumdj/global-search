@@ -410,6 +410,9 @@ export function GlobalSearch({
   featuredScopeIds = [],
   open: openProp,
   defaultOpen = false,
+  initialQuery = '',
+  initialScopeId,
+  initialBrowseMode = false,
   onOpenChange,
   onSelect,
   onSearch,
@@ -421,9 +424,11 @@ export function GlobalSearch({
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
-  const [query, setQuery] = useState('');
-  const [activeScopeId, setActiveScopeId] = useState<string | null>(null);
-  const [browseMode, setBrowseMode] = useState(false);
+  const [query, setQuery] = useState(initialQuery);
+  const [activeScopeId, setActiveScopeId] = useState<string | null>(
+    initialScopeId ?? null
+  );
+  const [browseMode, setBrowseMode] = useState(initialBrowseMode);
   const [asyncResults, setAsyncResults] = useState<GlobalSearchResultPayload | null>(
     null
   );
@@ -582,6 +587,7 @@ export function GlobalSearch({
   });
 
   const chooseScope = useEffectEvent((scope: GlobalSearchScope) => {
+    onSelect?.({ kind: 'scope', item: scope });
     setBrowseMode(false);
     setActiveScopeId(scope.id);
     startTransition(() => {

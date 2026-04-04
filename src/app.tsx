@@ -19,9 +19,11 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  GlobalSearch,
-  demoScopes,
+  GlobalSearchTrigger,
   demoSearchData,
+  useGlobalSearch,
+  useGlobalSearchAction,
+  useGlobalSearchListener,
   type GlobalSearchSelection,
 } from '@/lib/global-search';
 
@@ -67,6 +69,8 @@ const overviewCards = [
   },
 ];
 
+const demoActionIds = (demoSearchData.actions ?? []).map((action) => action.id);
+
 function createActivityMessage(selection: GlobalSearchSelection) {
   switch (selection.kind) {
     case 'action':
@@ -99,29 +103,44 @@ function createActivityMessage(selection: GlobalSearchSelection) {
 
 export default function App() {
   const nextActivityId = useRef(3);
-  const [searchOpen, setSearchOpen] = useState(true);
+  const { open } = useGlobalSearch();
   const [activity, setActivity] = useState([
     {
       id: 1,
-      title: 'Command palette live',
-      description: 'The demo opens by default so you can start testing immediately.',
+      title: 'Provider mounted',
+      description: 'The command palette is mounted once at the app entry point.',
     },
     {
       id: 2,
-      title: 'Shortcuts enabled',
-      description: 'Try Cmd/Ctrl + K, Q, R, A, P, D, S, or G.',
+      title: 'Hooks ready',
+      description: 'Triggers and feature listeners can now subscribe from anywhere.',
     },
   ]);
 
-  const handleSelection = (selection: GlobalSearchSelection) => {
+  useGlobalSearchListener((selection: GlobalSearchSelection) => {
     const nextActivity = createActivityMessage(selection);
     setActivity((currentActivity) =>
       [{ id: nextActivityId.current++, ...nextActivity }, ...currentActivity].slice(0, 6)
     );
-    toast.success(nextActivity.title, {
-      description: nextActivity.description,
+
+    console.log(selection);
+  });
+
+  useGlobalSearchListener(
+    (selection: GlobalSearchSelection) => {
+      const nextActivity = createActivityMessage(selection);
+      toast.success(nextActivity.title, {
+        description: nextActivity.description,
+      });
+    },
+    { kinds: ['menu', 'record', 'recent', 'scope'] }
+  );
+
+  useGlobalSearchAction(demoActionIds, (selection) => {
+    toast.success(selection.item.title, {
+      description: 'Handled by a feature hook listening for search actions.',
     });
-  };
+  });
 
   const featuredRecords = demoSearchData.records?.slice(0, 4) ?? [];
   const sidebarItems = demoSearchData.menuItems?.slice(0, 8) ?? [];
@@ -151,11 +170,7 @@ export default function App() {
             </Button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setSearchOpen(true)}
-            className="mt-6 flex items-center justify-between rounded-[18px] border border-[#e5dfd4] bg-white px-4 py-3 text-left shadow-[0_16px_34px_rgba(36,31,23,0.08)] transition-transform hover:-translate-y-0.5"
-          >
+          <GlobalSearchTrigger className="mt-6 flex w-full items-center justify-between rounded-[18px] border border-[#e5dfd4] bg-white px-4 py-3 text-left shadow-[0_16px_34px_rgba(36,31,23,0.08)] transition-transform hover:-translate-y-0.5">
             <div className="flex items-center gap-3">
               <div className="flex size-9 items-center justify-center rounded-full bg-[#f4f1ea]">
                 <Sparkles className="size-4 text-[#5f5d54]" />
@@ -173,7 +188,7 @@ export default function App() {
             >
               ⌘K
             </Badge>
-          </button>
+          </GlobalSearchTrigger>
 
           <div className="mt-6 space-y-1">
             {sidebarItems.map((item, index) => {
@@ -184,7 +199,7 @@ export default function App() {
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => setSearchOpen(true)}
+                  onClick={() => open({ scopeId: item.scopeId })}
                   className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors ${
                     active
                       ? 'bg-[#e9e6dc] text-[#23221d]'
@@ -236,7 +251,7 @@ export default function App() {
               <Button
                 variant="outline"
                 className="rounded-full border-[#dfd8cb] bg-white px-4 text-[#43413b]"
-                onClick={() => setSearchOpen(true)}
+                onClick={() => open()}
               >
                 Open search
                 <MoveRight className="size-4" />
@@ -255,9 +270,9 @@ export default function App() {
                     Search everything your users can access
                   </h2>
                   <p className="mt-2 max-w-[40rem] text-sm leading-6 text-[#6d6a61]">
-                    The component is already set up to search menu entries, actions, and
-                    dashboard records from one surface. For now it uses mock results, but
-                    the API key and resolver hook can replace that when you are ready.
+                    The package now mounts once through a provider at the app entry point.
+                    Independent triggers can open it anywhere, and feature hooks can react
+                    to selected actions without drilling state through the tree.
                   </p>
                 </div>
 
@@ -389,7 +404,7 @@ export default function App() {
                 <CreditCard className="size-6" />
               </div>
               <div>
-                <div className="text-sm text-white/70">Component state</div>
+                <div className="text-sm text-white/70">Provider state</div>
                 <div className="text-xl font-semibold tracking-[-0.04em]">
                   Search overlay ready
                 </div>
@@ -397,13 +412,14 @@ export default function App() {
             </div>
 
             <p className="mt-4 text-sm leading-6 text-white/72">
-              The app is now acting like a package demo surface. The global search
-              component is the product here, and this page simply showcases it.
+              The app is now acting like a package demo surface. One global provider owns
+              the modal, while the rest of the page uses triggers and event hooks like any
+              consuming product would.
             </p>
 
             <Button
               className="mt-5 w-full rounded-full bg-white text-[#23211d] hover:bg-white/90"
-              onClick={() => setSearchOpen(true)}
+              onClick={() => open()}
             >
               Reopen search
               <MoveRight className="size-4" />
@@ -437,19 +453,6 @@ export default function App() {
           </div>
         </aside>
       </motion.div>
-
-      <GlobalSearch
-        scopes={demoScopes}
-        actions={demoSearchData.actions}
-        menuItems={demoSearchData.menuItems}
-        records={demoSearchData.records}
-        recentSearches={demoSearchData.recentSearches}
-        featuredScopeIds={demoSearchData.featuredScopeIds}
-        open={searchOpen}
-        onOpenChange={setSearchOpen}
-        onSelect={handleSelection}
-        apiKey="demo-api-key"
-      />
     </div>
   );
 }

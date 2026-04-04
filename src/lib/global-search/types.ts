@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface GlobalSearchScope {
@@ -73,6 +74,12 @@ export interface GlobalSearchSearchParams {
   apiKey?: string;
 }
 
+export interface GlobalSearchOpenOptions {
+  query?: string;
+  scopeId?: string;
+  browseMode?: boolean;
+}
+
 export type GlobalSearchSelection =
   | { kind: 'action'; item: GlobalSearchAction }
   | { kind: 'menu'; item: GlobalSearchMenuItem }
@@ -80,10 +87,24 @@ export type GlobalSearchSelection =
   | { kind: 'scope'; item: GlobalSearchScope }
   | { kind: 'recent'; item: GlobalSearchRecentSearch };
 
+export type GlobalSearchActionSelection = Extract<
+  GlobalSearchSelection,
+  { kind: 'action' }
+>;
+
+export interface GlobalSearchListenerOptions {
+  kinds?: GlobalSearchSelection['kind'][];
+  actionIds?: string[];
+  when?: (selection: GlobalSearchSelection) => boolean;
+}
+
 export interface GlobalSearchProps extends GlobalSearchResultPayload {
   scopes: GlobalSearchScope[];
   open?: boolean;
   defaultOpen?: boolean;
+  initialQuery?: string;
+  initialScopeId?: string;
+  initialBrowseMode?: boolean;
   onOpenChange?: (open: boolean) => void;
   onSelect?: (selection: GlobalSearchSelection) => void;
   onSearch?: (
@@ -93,4 +114,21 @@ export interface GlobalSearchProps extends GlobalSearchResultPayload {
   apiKey?: string;
   className?: string;
   enableGlobalShortcuts?: boolean;
+}
+
+export interface GlobalSearchProviderProps
+  extends Omit<
+    GlobalSearchProps,
+    | 'open'
+    | 'defaultOpen'
+    | 'initialQuery'
+    | 'initialScopeId'
+    | 'initialBrowseMode'
+    | 'onOpenChange'
+    | 'onSelect'
+  > {
+  children: ReactNode;
+  defaultOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onSelect?: (selection: GlobalSearchSelection) => void;
 }
